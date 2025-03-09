@@ -1,12 +1,13 @@
 name: http_platforms
 description: A versatile HTTP networking package for Dart/Flutter that supports Web, Android, and iOS. Simplify API requests with cross-platform compatibility.
+version: 1.0.3
+repository: https://github.com/quyetvox/http_platforms
+homepage: https://qavox.site/
+
 platforms:
   android:
   ios:
   web:
-version: 1.0.0
-repository: https://github.com/quyetvox/http_platforms
-homepage: https://qavox.site/
 
 environment:
   sdk: ^3.5.3

@@ -4,5 +4,3 @@
 library;
 
 export 'src/http_platform.dart';
-
-// TODO: Export any libraries intended for clients of this package.

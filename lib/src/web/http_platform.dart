@@ -4,7 +4,9 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:http_platforms/src/model/http_method.dart';
 import 'package:http_platforms/src/model/http_platform_response.dart';
+import 'package:http_platforms/src/model/http_status_code.dart';
 import 'package:mime/mime.dart';
 
 class HttpPlatform {
@@ -14,10 +16,15 @@ class HttpPlatform {
     Map<String, String>? queryParam,
   }) async {
     Map<String, String> headerMap = {...headers ?? {}};
-    final res = await html.HttpRequest.request(url,
-        sendData: queryParam, method: 'GET', requestHeaders: headerMap);
+    final response = await html.HttpRequest.request(url,
+        sendData: queryParam,
+        method: HttpMethod.get.name,
+        requestHeaders: headerMap);
     return HttpPlatformResponse(
-        body: res.responseText ?? '', url: url, headers: headers);
+        body: response.responseText ?? '',
+        url: url,
+        headers: headers,
+        statusCode: response.status ?? HttpStatusCode.notFound.code);
   }
 
   static Future<HttpPlatformResponse> post({
@@ -26,10 +33,15 @@ class HttpPlatform {
     Map<String, String>? headers,
   }) async {
     Map<String, String> headerMap = {...headers ?? {}};
-    final res = await html.HttpRequest.request(url,
-        sendData: body, method: 'POST', requestHeaders: headerMap);
+    final response = await html.HttpRequest.request(url,
+        sendData: body,
+        method: HttpMethod.post.name,
+        requestHeaders: headerMap);
     return HttpPlatformResponse(
-        body: res.responseText ?? '', url: url, headers: headers);
+        body: response.responseText ?? '',
+        url: url,
+        headers: headers,
+        statusCode: response.status ?? HttpStatusCode.notFound.code);
   }
 
   static Future<HttpPlatformResponse> delete({
@@ -38,13 +50,18 @@ class HttpPlatform {
     Map<String, String>? headers,
   }) async {
     Map<String, String> headerMap = {...headers ?? {}};
-    final res = await html.HttpRequest.request(url,
-        method: 'DELETE', sendData: body, requestHeaders: headerMap);
+    final response = await html.HttpRequest.request(url,
+        method: HttpMethod.delete.name,
+        sendData: body,
+        requestHeaders: headerMap);
     return HttpPlatformResponse(
-        body: res.responseText ?? '', url: url, headers: headers);
+        body: response.responseText ?? '',
+        url: url,
+        headers: headers,
+        statusCode: response.status ?? HttpStatusCode.notFound.code);
   }
 
-  static Future<String?> postFormData({
+  static Future<HttpPlatformResponse> postFormData({
     required String url,
     required String keyFile,
     required String fileName,
@@ -54,7 +71,7 @@ class HttpPlatform {
   }) async {
     Map<String, String> headerMap = {...headers ?? {}};
     Uri uri = Uri.parse(url);
-    var request = http.MultipartRequest('POST', uri)
+    var request = http.MultipartRequest(HttpMethod.post.name, uri)
       ..fields.addAll(body ?? {})
       ..headers.addAll(headerMap);
     request.files.addAll([
@@ -69,9 +86,13 @@ class HttpPlatform {
     try {
       final response = await request.send();
       final res = await response.stream.bytesToString();
-      return res;
+      return HttpPlatformResponse(body: res, url: url, headers: headers);
     } catch (err) {
-      return null;
+      return HttpPlatformResponse(
+          body: '{"message": "$err"}',
+          url: url,
+          headers: headers,
+          statusCode: HttpStatusCode.badRequest.code);
     }
   }
 }

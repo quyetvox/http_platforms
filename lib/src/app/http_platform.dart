@@ -1,7 +1,9 @@
 import 'dart:typed_data';
+import 'package:http_platforms/src/model/http_method.dart';
 import 'package:http_platforms/src/model/http_platform_response.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:http_platforms/src/model/http_status_code.dart';
 import 'package:mime/mime.dart';
 
 class HttpPlatform {
@@ -14,7 +16,10 @@ class HttpPlatform {
     Map<String, String> headerMap = {...headers ?? {}};
     final response = await http.get(uri, headers: headerMap);
     return HttpPlatformResponse(
-        body: response.body, url: url, headers: headers);
+        body: response.body,
+        url: url,
+        headers: headers,
+        statusCode: response.statusCode);
   }
 
   static Future<HttpPlatformResponse> post({
@@ -26,7 +31,10 @@ class HttpPlatform {
     Map<String, String> headerMap = {...headers ?? {}};
     final response = await http.post(uri, headers: headerMap, body: body);
     return HttpPlatformResponse(
-        body: response.body, url: url, headers: headers);
+        body: response.body,
+        url: url,
+        headers: headers,
+        statusCode: response.statusCode);
   }
 
   static Future<HttpPlatformResponse> delete({
@@ -37,10 +45,13 @@ class HttpPlatform {
     Map<String, String> headerMap = {...headers ?? {}};
     final response = await http.delete(uri, headers: headerMap);
     return HttpPlatformResponse(
-        body: response.body, url: url, headers: headers);
+        body: response.body,
+        url: url,
+        headers: headers,
+        statusCode: response.statusCode);
   }
 
-  static Future<String?> postFormData({
+  static Future<HttpPlatformResponse> postFormData({
     required String url,
     required String keyFile,
     required String fileName,
@@ -50,7 +61,7 @@ class HttpPlatform {
   }) async {
     Map<String, String> headerMap = {...headers ?? {}};
     Uri uri = Uri.parse(url);
-    var request = http.MultipartRequest('POST', uri)
+    var request = http.MultipartRequest(HttpMethod.post.name, uri)
       ..fields.addAll(body ?? {})
       ..headers.addAll(headerMap);
     request.files.addAll([
@@ -65,9 +76,13 @@ class HttpPlatform {
     try {
       final response = await request.send();
       final res = await response.stream.bytesToString();
-      return res;
+      return HttpPlatformResponse(body: res, url: url, headers: headers);
     } catch (err) {
-      return null;
+      return HttpPlatformResponse(
+          body: '{"message": "$err"}',
+          url: url,
+          headers: headers,
+          statusCode: HttpStatusCode.badRequest.code);
     }
   }
 }
