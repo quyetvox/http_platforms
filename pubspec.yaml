@@ -1,11 +1,11 @@
 name: http_platforms
-description: A starting point for Dart libraries or applications.
+description: A versatile HTTP networking package for Dart/Flutter that supports Web, Android, and iOS. Simplify API requests with cross-platform compatibility.
 platforms:
   android:
   ios:
   web:
 version: 1.0.0
-repository: https://github.com/VoQuyt/http_platforms
+repository: https://github.com/quyetvox/http_platforms
 homepage: https://qavox.site/
 
 environment:
